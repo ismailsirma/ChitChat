@@ -12,7 +12,7 @@ import java.util.HashSet;
  * Created by ismailsirma on 23.6.2015.
  * ChitChatServer with threaded functionality for multi-user
  */
-public class ChitChat{
+public class ChitChatServer{
 
     private static final int port = 10002;
 
