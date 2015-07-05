@@ -115,8 +115,9 @@ public class ChitChatClient {
                     output.println(messageTF.getText());
                     //clear the message area
                     messageTF.setText("");
-                    //clear the status area
-                    statusbar.setText("");
+		    // Show the time that message has been sent in the statusbar
+                    date = new Date();
+                    statusbar.setText("Your message at " + date.getHours() + ":" + date.getMinutes() + ":" + date.getSeconds() + " has been sent");
                     usernameTF.setEnabled(false);
                     frame.setVisible(true);
                 }
@@ -137,7 +138,7 @@ public class ChitChatClient {
                     output.println(messageTF.getText());
                     //clear the message area
                     messageTF.setText("");
-                    //clear the status area
+		    // Show the time that message has been sent in the statusbar
                     date = new Date();
                     statusbar.setText("Your message at " + date.getHours() + ":" + date.getMinutes() + ":" + date.getSeconds() + " has been sent");
                     usernameTF.setEnabled(false);
