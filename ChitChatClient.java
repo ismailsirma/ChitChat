@@ -5,231 +5,85 @@ import javax.swing.text.*;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.InputStreamReader;
-import java.io.PrintWriter;
-import java.net.Socket;
 import java.util.Date;
 
 /**
  * Created by ismailsirma on 03.7.2015.
  */
-public class ChitChatClient {
-
-    PrintWriter output;
-    BufferedReader input;
+public class ChitChatClient extends JFrame{
 
     // initialize GUI variables
-    JTextField usernameTF;
-    JTextField messageTF;
-    JLabel label1;
-    JScrollPane jScrollPane1;
-    JLabel statusbar;
-    JButton button1;
-    JButton button2;
+    // create a text field for user to enter their name
+    private  JTextField usernameTF = new JTextField();
+    // create a text field for user to enter their message
+    private JTextField messageTF = new JTextField();
+    private JLabel label1 = new JLabel();
+    private JLabel statusbar = new JLabel();
+    private JButton button1 = new JButton("Set nickname");
+    private JButton button2 = new JButton("Send");
 
     private JTextPane textArea = new JTextPane();
-    StyledDocument document;
-    Style def;
-
-    JFrame frame;
-    String usernamee = null;
-    Date date = new Date();
+    private JScrollPane jScrollPane1 = new JScrollPane(textArea);
+    private Style def = StyleContext.getDefaultStyleContext().getStyle( StyleContext.DEFAULT_STYLE );
+    private StyledDocument document = textArea.getStyledDocument();
 
     // Generate a random color for the message text
     int redValue = 0 + (int)(Math.random()*255);
     int greenValue = 0 + (int)(Math.random()*255);
     int blueValue = 0 + (int)(Math.random()*255);
-    final Color messageColor = new Color(redValue,greenValue,blueValue);
+    private Color messageColor = new Color(redValue,greenValue,blueValue);
+
+    private String usernamee;
+    Date date = new Date();
+
+    private ChitChatClientSwingWorker swingWorker;
 
 
     public static void main(String[] args){
-        ChitChatClient ch = new ChitChatClient();
-        ch.run();
-    }
-
-    public ChitChatClient() {
-
-    }
-
-    private void run(){
-        try {
-
-            // Set the graphical user interface
-            SetLayout();
-
-            // set the frame visible
-            frame.setVisible(true);
-
-            // while server is waiting for a call,
-            // client instantiates socket object with specified server address and port
-            Socket socket = new Socket("localhost", 10002);
-            // client gets the server's output stream
-            output = new PrintWriter(socket.getOutputStream(),true);
-
-            // Create a buffered reader to the socket
-            // in order to get the input from the server
-            // Buffered reader reads the bytes and converts them into chars.
-            input = new BufferedReader(
-                    new InputStreamReader(socket.getInputStream()));
-
-            String serverMessage;
-
-
-            // when user hits enter key in username text field, show it on status bar
-            usernameTF.addActionListener(new ActionListener() {
-                @Override
-                public void actionPerformed(ActionEvent e) {
-                    usernamee = usernameTF.getText();
-                    output.println(usernamee);
-                    statusbar.setText("Username set!");
-                    usernameTF.setEnabled(false);
-                    frame.setVisible(true);
-                }
-            });
-
-            // when an action is performed, capture the action
-            // button1 is the button sets the username
-            button1.addActionListener(new ActionListener() {
-                @Override
-                public void actionPerformed(ActionEvent e) {
-                    usernamee = usernameTF.getText();
-                    output.println(usernamee);
-                    statusbar.setText("Username set!");
-                    usernameTF.setEnabled(false);
-                    frame.setVisible(true);
-                }
-            });
-
-
-            // when user writes down a message and hits the enter key, send the message
-            messageTF.addActionListener(new ActionListener() {
-                @Override
-                public void actionPerformed(ActionEvent e) {
-                    if (usernamee == null) {
-                        messageTF.setText("");
-                        return;
-                    }
-                    // send the message to the server
-                    output.println(messageTF.getText());
-                    //clear the message area
-                    messageTF.setText("");
-		    // Show the time that message has been sent in the statusbar
-                    date = new Date();
-                    statusbar.setText("Your message at " + date.getHours() + ":" + date.getMinutes() + ":" + date.getSeconds() + " has been sent");
-                    usernameTF.setEnabled(false);
-                    frame.setVisible(true);
-                }
-            });
-
-            // button2 is the button sends the message
-            button2.addActionListener(new ActionListener() {
-                @Override
-                public void actionPerformed(ActionEvent e) {
-                    // take the text and put it on the label
-
-                    // if user didn't specify the user name
-                    if(usernamee == null){
-                        messageTF.setText("");
-                        return;
-                    }
-
-                    output.println(messageTF.getText());
-                    //clear the message area
-                    messageTF.setText("");
-		    // Show the time that message has been sent in the statusbar
-                    date = new Date();
-                    statusbar.setText("Your message at " + date.getHours() + ":" + date.getMinutes() + ":" + date.getSeconds() + " has been sent");
-                    usernameTF.setEnabled(false);
-                    frame.setVisible(true);
-                }
-            });
-
-
-            while(true){
-
-                try {
-                    // receive client input
-                    serverMessage = input.readLine();
-                    // JTextArea method
-                    //textArea.append(serverMessage + "\n");
-                    // write the message to the Text Pane
-                    if(serverMessage.startsWith("MESSAGE " + usernamee)) {
-
-                        document = createTextPane().getStyledDocument();
-                        Style style1 = createTextPane().getStyle("regular");
-
-                        document.insertString(document.getLength(), serverMessage + "\n", style1);
-                        frame.setVisible(true);
-                    } else{
-                        document = createTextPane().getStyledDocument();
-                        Style style2 = createTextPane().getStyle("italic");
-
-                        document.insertString(document.getLength(), serverMessage + "\n", style2);
-                        frame.setVisible(true);
-                    }
-                    // end loop
-                    if (serverMessage.equals("Bye.")) {
-                        break;
-                    }
-
-                }catch(BadLocationException e){
-                    System.out.println(e);
-                }
+        SwingUtilities.invokeLater(new Runnable() {
+            @Override
+            public void run() {
+                ChitChatClient chitchat = new ChitChatClient();
+                chitchat.SetLayout();
+                chitchat.setVisible(true);
             }
-        } catch (IOException e) {
-            //e.printStackTrace();
-            System.out.println("There is an I/O problem or Connection has been reset");
+        });
+    }
+
+    public void messageReceived(String message) {
+
+        // if current user send messages it has regular style, if not it will be italic
+        if(message.startsWith("MESSAGE " + usernamee)) {
+            updateMessageArea(message, "regular");
+        } else{
+            updateMessageArea(message, "italic");
         }
 
     }
 
     public void SetLayout(){
 
-        // Create a frame
-        frame = new JFrame("Chat Client");
-        frame.setSize(500, 400);
-
-        // create a text field for user to enter their name
-        usernameTF = new JTextField();
-        // create a text field for user to enter their message
-        messageTF = new JTextField();
-
-        button1 = new JButton("Set nickname");
-        button2 = new JButton("Send");
-        label1 = new JLabel();
-        statusbar = new JLabel();
-
+        setTitle("Chat Client");
+        setSize(500, 400);
         // How frame is closed
-        frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-        frame.setTitle("Chat Client");
-
-        // text area where incoming and outgoing messages being seen
-
-        // If JTextArea was used instead of JTextPane
-        //textArea.setColumns(20);
-        //textArea.setRows(5);
-        //textArea.setLineWrap(true);
-        //textArea.setWrapStyleWord(true);
-        //textArea.setEditable(false);
+        setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 
         // Create the TextPane that shows incoming and outgoing messages
         createTextPane();
 
-        jScrollPane1 = new JScrollPane(textArea);
         jScrollPane1.setViewportView(textArea);
 
         label1.setText("Enter your username:");
 
-
-
+        // scrollbar automatically goes down
         DefaultCaret caret = (DefaultCaret)textArea.getCaret();
         caret.setUpdatePolicy(DefaultCaret.ALWAYS_UPDATE);
 
+
+    //************************ CreateLayout()  *******************************************************************//
         // Creating layout
-        GroupLayout layout = new GroupLayout(frame.getContentPane());
-        frame.getContentPane().setLayout(layout);
+        GroupLayout layout = new GroupLayout(getContentPane());
+        getContentPane().setLayout(layout);
 
         //Create a parallel group for the horizontal axis
         GroupLayout.ParallelGroup hGroup = layout.createParallelGroup(GroupLayout.Alignment.LEADING);
@@ -300,15 +154,108 @@ public class ChitChatClient {
 
         //Window to be sized to fit the preferred size and layouts of its sub components.
         //The resulting width and height of the window are automatically enlarged if either of dimensions
-        //is less than the minimum size as specified by the previous call to the setMinimumSize method.
-        frame.pack();
+        //is less than the minim um size as specified by the previous call to the setMinimumSize method.
+        pack();
+
+        //********************** Action Listeners ******************************************//
+
+        // call swingWorker
+        swingWorker = new ChitChatClientSwingWorker(textArea,document,
+                usernamee);
+        swingWorker.execute();
+        // when user hits enter key in username text field, show it on status bar
+        usernameTF.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                usernamee = usernameTF.getText();
+                // send username to the server
+                try {
+                    // set the username in swingworker class
+                    swingWorker.setUsernamee(usernamee);
+                    swingWorker.sendMessage(usernamee);
+                } catch (Exception e1) {
+                    e1.printStackTrace();
+                }
+                statusbar.setText("Username set!");
+                usernameTF.setEnabled(false);
+                //frame.setVisible(true);
+            }
+        });
+
+        // when an action is performed, capture the action
+        // button1 is the button sets the username
+        button1.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                usernamee = usernameTF.getText();
+                // send username to the server
+                try {
+                    // set the username in swingworker class
+                    swingWorker.setUsernamee(usernamee);
+                    swingWorker.sendMessage(usernamee);
+                } catch (Exception e1) {
+                    e1.printStackTrace();
+                }
+                statusbar.setText("Username set!");
+                usernameTF.setEnabled(false);
+                //frame.setVisible(true);
+            }
+        });
+
+
+        // when user writes down a message and hits the enter key, send the message
+        messageTF.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                if (usernamee == null) {
+                    messageTF.setText("");
+                    return;
+                }
+                // send the message to the server
+                try {
+                    swingWorker.sendMessage(messageTF.getText());
+                } catch (Exception e1) {
+                    e1.printStackTrace();
+                }
+                //clear the message area
+                messageTF.setText("");
+                //clear the status area
+                statusbar.setText("");
+                usernameTF.setEnabled(false);
+                //frame.setVisible(true);
+            }
+        });
+
+        // button2 is the button sends the message
+        button2.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                // take the text and put it on the label
+
+                // if user didn't specify the user name
+                if(usernamee == null){
+                    messageTF.setText("");
+                    return;
+                }
+                // send the message to the server
+                try {
+                    swingWorker.sendMessage(messageTF.getText());
+                } catch (Exception e1) {
+                    e1.printStackTrace();
+                }
+                //clear the message area
+                messageTF.setText("");
+                //clear the status area
+                date = new Date();
+                statusbar.setText("Your message at " + date.getHours() + ":" + date.getMinutes() + ":" + date.getSeconds() + " has been sent");
+                usernameTF.setEnabled(false);
+                //frame.setVisible(true);
+            }
+        });
     }
 
     private JTextPane createTextPane(){
 
-        document = textArea.getStyledDocument();
-
-        def = StyleContext.getDefaultStyleContext().getStyle( StyleContext.DEFAULT_STYLE );
         Style regular = document.addStyle( "regular", def );
 
         StyleConstants.setForeground(regular,messageColor);
@@ -328,4 +275,19 @@ public class ChitChatClient {
 
         return textArea;
     }
+
+    private void updateMessageArea(String serverMessage,String stylename){
+        try {
+            //document = createTextPane().getStyledDocument();
+            Style style = textArea.getStyle(stylename);
+
+            document.insertString(document.getLength(), serverMessage + "\n", style);
+            //frame.setVisible(true);
+            setVisible(true);
+        }catch(BadLocationException e){
+            System.out.println(e);
+        }
+    }
+
 }
+

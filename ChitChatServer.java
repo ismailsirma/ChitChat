@@ -33,7 +33,7 @@ public class ChitChatServer{
             // this socket is created in order to receive incoming messages
             try {
                 while (true){
-                new ChitChat(serverSocket.accept()).start();
+                    new ChitChat(serverSocket.accept()).start();
                 }
             }catch (IOException e){
                 e.printStackTrace();
